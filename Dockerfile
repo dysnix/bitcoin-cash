@@ -13,9 +13,6 @@ RUN set -ex \
 
 RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf
 
-COPY supervisord.conf /etc/supervisor/conf.d/programs.conf
-COPY docker-entrypoint.sh /entrypoint.sh
-
 RUN bash -c 'echo alias bitcoin-cli="bitcoin-cli --datadir=/data" >> /etc/profile.d/bitcoin-cash.sh'
 RUN chmod 777 /etc/profile.d/bitcoin-cash.sh
 
@@ -34,5 +31,8 @@ RUN mkdir "$BITCOIN_DATA" \
 VOLUME /data
 
 EXPOSE 443
+
+COPY supervisord.conf /etc/supervisor/conf.d/programs.conf
+COPY docker-entrypoint.sh /entrypoint.sh
 
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
