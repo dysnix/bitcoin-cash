@@ -12,6 +12,10 @@ if [[ "$1" == "bitcoin-cli" || "$1" == "bitcoin-tx" || "$1" == "bitcoind" || "$1
 		rpcuser=${BITCOIN_RPC_USER:-bitcoin}
 		EOF
 		chown bitcoin:bitcoin "$BITCOIN_DATA/bitcoin.conf"
+		if [ ! -z "$BITCOIN_TESTNET" ];then
+			echo testnet=1 >> "$BITCOIN_DATA/bitcoin.conf"
+			echo rpcport=8332 >> "$BITCOIN_DATA/bitcoin.conf"
+		fi
 	fi
 
 	# ensure correct ownership and linking of data directory
