@@ -1,20 +1,24 @@
 FROM debian:stretch-slim
 
-ENV BITCOIN_VERSION 0.17.2
+ENV BITCOIN_VERSION 0.20.2
 ENV BITCOIN_URL https://download.bitcoinabc.org/$BITCOIN_VERSION/linux/bitcoin-abc-$BITCOIN_VERSION-x86_64-linux-gnu.tar.gz
-ENV BITCOIN_DATA /data
 
-RUN groupadd -r bitcoin && useradd -r -m -g bitcoin bitcoin
+ARG USER_ID
+ARG GROUP_ID
+
+ENV HOME /home/bitcoin
+
+# add user with specified (or default) user/group ids
+ENV USER_ID ${USER_ID:-1000}
+ENV GROUP_ID ${GROUP_ID:-1000}
+
+RUN groupadd -g ${GROUP_ID} bitcoin \
+	&& useradd -u ${USER_ID} -g bitcoin -s /bin/bash -m -d ${HOME} bitcoin
 
 RUN set -ex \
 	&& apt-get update \
-	&& apt-get install -qq --no-install-recommends ca-certificates dirmngr gosu gpg wget nginx supervisor \
+	&& apt-get install -qq --no-install-recommends ca-certificates wget gosu \
 	&& rm -rf /var/lib/apt/lists/*
-
-RUN sed -i 's/^\(\[supervisord\]\)$/\1\nnodaemon=true/' /etc/supervisor/supervisord.conf
-
-RUN bash -c 'echo alias bitcoin-cli="bitcoin-cli --datadir=/data" >> /etc/profile.d/bitcoin-cash.sh'
-RUN chmod 777 /etc/profile.d/bitcoin-cash.sh
 
 # install bitcoin binaries
 RUN set -ex \
@@ -23,16 +27,6 @@ RUN set -ex \
 	&& tar -xzvf bitcoin.tar.gz -C /usr/local --strip-components=1 --exclude=*-qt \
 	&& rm -rf /tmp/*
 
-# create data directory
-RUN mkdir "$BITCOIN_DATA" \
-	&& chown -R bitcoin:bitcoin "$BITCOIN_DATA" \
-	&& ln -sfn "$BITCOIN_DATA" /home/bitcoin/.bitcoin \
-	&& chown -h bitcoin:bitcoin /home/bitcoin/.bitcoin
-VOLUME /data
-
-EXPOSE 443
-
-COPY supervisord.conf /etc/supervisor/conf.d/programs.conf
-COPY docker-entrypoint.sh /entrypoint.sh
-
-CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["bitcoind"]
