@@ -5,7 +5,7 @@ GOSU="gosu bitcoin"
 if [ "$(id -u)" -ne "0" ];then
   GOSU=""
 fi
-if [[ "$1" == "bitcoin-cli" || "$1" == "bitcoin-tx" || "$1" == "bitcoind" || "$1" == "test_bitcoin" ]]; then
+if [[ "$1" == "bitcoin-cli" || "$1" == "bitcoin-tx" || "$1" == "bitcoind" ]]; then
 	exec $GOSU "$@"
 else
   exec $GOSU bitcoind "$@"
