@@ -8,7 +8,7 @@ bitcoin-cash docker build
     1. use `Docker Tag`: `{sourceref}`
 1. Use this code as example to trigger specific version build via git tag. Check upstream docker image version exists before proceed.
 ```bash
-git clone https://github.com/blockchain-etl/docker-bitcoin-cashd
+git clone git@github.com:blockchain-etl/docker-bitcoin-cashd.git
 cd docker-bitcoin-cashd
 git tag 0.20.12
 git push origin 0.20.12
